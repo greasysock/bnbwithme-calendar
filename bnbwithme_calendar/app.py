@@ -1,13 +1,12 @@
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
-
 from db import models
 
-e = models.connect()
-session_factory = sessionmaker(bind=e)
-Session = scoped_session(session_factory)
+Session = models.session()
 
 s = Session()
 
-print(s.query(models.Property).all()[0].icals[0].site())
+properties = s.query(models.Property).all()
 
+for location in properties:
+    for ical in location.icals:
+        print(ical.link)
+    print(location.name)

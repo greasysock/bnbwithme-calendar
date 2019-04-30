@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, PickleType, Enum, LargeBinary, BigInteger, TIMESTAMP, VARCHAR, Date, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 import enum
 from . import config
 Base = declarative_base()
@@ -53,3 +53,8 @@ def connect():
     conf = config.get()
     c = conf["postgresql"]
     return create_engine(f'postgresql://{c["user"]}:{c["pass"]}@{c["host"]}:{c["port"]}/{c["db"]}')
+
+def session():
+    e = connect()
+    session_factory = sessionmaker(bind=e)
+    return scoped_session(session_factory)
