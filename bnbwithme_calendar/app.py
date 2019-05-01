@@ -10,7 +10,6 @@ properties = s.query(models.Property).all()
 for location in properties:
     for ical in location.icals:
         reservations = ical_pull.get_all_reservations(ical)
-        #s.close()
         for reservation in reservations:
 
             search = s.query(models.Reservation).filter_by(ical=ical).filter_by(start=reservation.start).filter_by(end=reservation.end)

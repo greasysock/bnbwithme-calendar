@@ -2,9 +2,9 @@ import requests, datetime
 from db import models
 
 def get_raw_ical(link):
-    #r = requests.get(link)
-    #return r.content.decode('utf-8')
-    return open('abbtest.ics', 'r').read()
+    r = requests.get(link)
+    return r.content.decode('utf-8')
+    #return open('abbtest.ics', 'r').read()
 
 # Returns array split by BEGIN/END
 def get_raw_split_ical(link):
@@ -111,7 +111,7 @@ def get_all_airbnb_reservations(ical : models.Ical):
     return out_reservations
 
 def get_all_vrbo_reservations(ical : models.Ical):
-    pass
+    return []
 
 def get_all_reservations(ical : models.Ical):
     if ical.site() is models.Service.airbnb:
