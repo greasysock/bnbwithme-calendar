@@ -1,6 +1,0 @@
-postgresql:
-  host: localhost
-  user: chris
-  pass: apples
-  port: 5432
-  db: bnbwithme_development

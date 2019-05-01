@@ -1,7 +1,7 @@
-from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, PickleType, Enum, LargeBinary, BigInteger, TIMESTAMP, VARCHAR, Date, Text
+from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, BigInteger, Date, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
-import enum
+import enum, datetime
 from . import config
 Base = declarative_base()
 
@@ -17,10 +17,10 @@ service_map = {
 class Property(Base):
     __tablename__ = "properties"
     id = Column(BigInteger, primary_key=True)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
-    name = Column(VARCHAR)
-    color = Column(VARCHAR)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+    name = Column(String)
+    color = Column(String)
     owner_id = Column(BigInteger)
     icals = relationship("Ical", backref="location")
     reservations = relationship("Reservation", backref="location")
@@ -28,23 +28,24 @@ class Property(Base):
 class Reservation(Base):
     __tablename__ = "reservations"
     id = Column(BigInteger, primary_key=True)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow)
     start = Column(Date)
     end = Column(Date)
     cleaner_id = Column(BigInteger)
     property_id = Column(BigInteger, ForeignKey('properties.id'))
-    ical_id = Column(BigInteger)
+    ical_id = Column(BigInteger, ForeignKey('icals.id'))
     duration = Column(Integer)
 
 class Ical(Base):
     __tablename__ = "icals"
     id = Column(BigInteger, primary_key=True)
-    created_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
     service = Column(Integer)
     link = Column(Text)
     property_id = Column(BigInteger, ForeignKey('properties.id'))
+    reservations = relationship("Reservation", backref="ical")
 
     def site(self):
         return service_map[self.service]

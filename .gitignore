@@ -1,2 +1,4 @@
-__pycache__*
+*__pycache__*
 bnbwithme_calendar/db/config.yaml
+bnbwithme_calendar/vrbotest.ics
+bnbwithme_calendar/abbtest.ics
