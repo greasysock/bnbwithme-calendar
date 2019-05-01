@@ -51,6 +51,43 @@ def recover_values(recover:tuple, source:list):
 def recover_date(date_string : str):
     return datetime.datetime.strptime(date_string, "%Y%m%d").date()
 
+def abb_recover_itinerary(guest_string : str):
+    # New abb parse method
+    start_index = None
+    end_index = None
+    for n, letter in enumerate(guest_string):
+        if letter == "(":
+            start_index = n+1
+    if not start_index:
+        return 'Not available'
+    for m, letter in enumerate(guest_string[start_index:]):
+        m = m+start_index
+        if letter == ")":
+            end_index = m
+    if not start_index:
+        return 'Not available'
+    return guest_string[start_index:end_index]
+
+abb_not_available = {'Not available', "(no email alias available)"}
+
+def abb_recover_guest(guest_string : str):
+    return guest_string.split('(')[0][:-1]
+
+def abb_recover_email(email_string : str):
+    whitespace_free_email = email_string.strip()
+    if whitespace_free_email in abb_not_available:
+        return None
+    return whitespace_free_email
+
+def abb_recover_phone(event_list : list):
+    abb_phone = "PHONE: "
+    for i, event in enumerate(event_list):
+        if event == abb_phone:
+            number = event_list[i+1].strip()
+            if number != "":
+                return number
+    return None
+
 def get_all_airbnb_reservations(ical : models.Ical):
     split_list = get_raw_split_ical(ical.link)
     find = ("DTSTART;VALUE=DATE", "DTEND;VALUE=DATE", "SUMMARY", "EMAIL")
@@ -58,12 +95,18 @@ def get_all_airbnb_reservations(ical : models.Ical):
     for event in split_list:
         recovered = recover_values(find, event)
         start = recover_date(recovered[0])
-        if start >= datetime.datetime.now().date():
-            print(start)
-            reservation = models.Reservation
+        end = recover_date(recovered[1])
+        guest_check = abb_recover_itinerary(recovered[2])
+        # Only deal with upcoming or current reservations
+        if (start >= datetime.datetime.now().date() or end >= datetime.datetime.now().date()) and (guest_check not in abb_not_available):
+            reservation = models.Reservation()
             reservation.start = start
-            reservation.end = recover_date(recovered[1])
-            reservation.ical = ical
+            reservation.end = end
+            reservation.guest = abb_recover_guest(recovered[2])
+            reservation.email = abb_recover_email(recovered[3])
+            reservation.phone = abb_recover_phone(event)
+            # Create Time delta and convert into days int
+            reservation.duration = int((reservation.end - reservation.start).days)
             out_reservations.append(reservation)
     return out_reservations
 
