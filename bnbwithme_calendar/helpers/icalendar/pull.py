@@ -4,14 +4,18 @@ from db import models
 def get_raw_ical(link):
     r = requests.get(link)
     return r.content.decode('utf-8')
-    #return open('abbtest.ics', 'r').read()
+    #return open('vrbotest.ics', 'r').read()
 
 # Returns array split by BEGIN/END
-def get_raw_split_ical(link):
-    tmpraw = get_raw_ical(link).split('\\n')
+def get_raw_split_ical(ical : models.Ical):
+    tmpraw = get_raw_ical(ical.link).split('\\n')
     raw = []
     for line in tmpraw:
-        raw += line.split('\n')
+        if ical.site() is models.Service.airbnb:
+            raw += line.split('\n')
+        elif ical.site() is models.Service.vrbo:
+            raw += line.split('\r\n')
+
     begin_event = "BEGIN:VEVENT"
     end_event = "END:VEVENT"
     split_event = []
@@ -89,18 +93,18 @@ def abb_recover_phone(event_list : list):
     return None
 
 def get_all_airbnb_reservations(ical : models.Ical):
-    split_list = get_raw_split_ical(ical.link)
+    split_list = get_raw_split_ical(ical)
     find = ("DTSTART;VALUE=DATE", "DTEND;VALUE=DATE", "SUMMARY", "EMAIL")
     out_reservations = []
     for event in split_list:
         recovered = recover_values(find, event)
-        start = recover_date(recovered[0])
-        end = recover_date(recovered[1])
+        # Dates only include nights the guest stays, not the days they spend, so add 1 more day
+        end = recover_date(recovered[1]) + datetime.timedelta(days=1)
         guest_check = abb_recover_itinerary(recovered[2])
         # Only deal with upcoming or current reservations
-        if (start >= datetime.datetime.now().date() or end >= datetime.datetime.now().date()) and (guest_check not in abb_not_available):
+        if (end >= datetime.datetime.now().date()) and (guest_check not in abb_not_available):
             reservation = models.Reservation()
-            reservation.start = start
+            reservation.start = recover_date(recovered[0])
             reservation.end = end
             reservation.guest = abb_recover_guest(recovered[2])
             reservation.email = abb_recover_email(recovered[3])
@@ -110,8 +114,27 @@ def get_all_airbnb_reservations(ical : models.Ical):
             out_reservations.append(reservation)
     return out_reservations
 
+vrbo_not_available = {"Blocked"}
+
+def vrbo_recover_guest(guest:str):
+    return guest.split("-")[1][1:]
+
 def get_all_vrbo_reservations(ical : models.Ical):
-    return []
+    split_list = get_raw_split_ical(ical)
+    find = ("DTSTART;VALUE=DATE", "DTEND;VALUE=DATE", "SUMMARY")
+    out_reservations = []
+    for event in split_list:
+        recovered = recover_values(find, event)
+        end = recover_date(recovered[1]) + datetime.timedelta(days=1)
+        guest_check = recovered[2]
+        if (end >= datetime.datetime.now().date() and guest_check not in vrbo_not_available):
+            reservation = models.Reservation()
+            reservation.start = recover_date(recovered[0])
+            reservation.end = end
+            reservation.guest = vrbo_recover_guest(recovered[2])
+            reservation.duration = int((reservation.end - reservation.start).days)
+            out_reservations.append(reservation)
+    return out_reservations
 
 def get_all_reservations(ical : models.Ical):
     if ical.site() is models.Service.airbnb:
