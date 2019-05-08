@@ -14,7 +14,7 @@ def get_raw_split_ical(ical : models.Ical):
         if ical.site() is models.Service.airbnb:
             raw += line.split('\n')
         elif ical.site() is models.Service.vrbo:
-            raw += line.split('\r\n')
+            raw += line.split('\n')
 
     begin_event = "BEGIN:VEVENT"
     end_event = "END:VEVENT"
