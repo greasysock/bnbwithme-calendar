@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from db import models
 from helpers.icalendar import pull as ical_pull
 import datetime, time
