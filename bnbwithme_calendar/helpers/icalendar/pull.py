@@ -1,8 +1,10 @@
 import requests, datetime
 from db import models
 
+headers = {'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'}
+
 def get_raw_ical(link):
-    r = requests.get(link)
+    r = requests.get(link, headers=headers)
     return r.content.decode('utf-8')
     #return open('vrbotest.ics', 'r').read()
 
@@ -10,11 +12,12 @@ def get_raw_ical(link):
 def get_raw_split_ical(ical : models.Ical):
     tmpraw = get_raw_ical(ical.link).split('\\n')
     raw = []
+
     for line in tmpraw:
         if ical.site() is models.Service.airbnb:
             raw += line.split('\n')
         elif ical.site() is models.Service.vrbo:
-            raw += line.split('\n')
+            raw += line.split('\r\n')
 
     begin_event = "BEGIN:VEVENT"
     end_event = "END:VEVENT"
