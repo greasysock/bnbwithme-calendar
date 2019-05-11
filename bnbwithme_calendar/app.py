@@ -4,7 +4,7 @@ from helpers.icalendar import pull as ical_pull
 import datetime, time, logging
 Session = models.session()
 
-logging.basicConfig(filename='bnbwithme-calendar.log',level=logging.DEBUG)
+logging.basicConfig(filename='bnbwithme-calendar.log',level=logging.INFO)
 s = Session()
 
 def log_change(prepend:str, ical, reservation):
@@ -38,7 +38,7 @@ for ical in icals:
         if not match:
             # Can only get to this point if there was no matching reservation in ical feed
             logging.warning(log_change("DELETING", ical, reservation))
-            reservation.delete()
+            s.query(models.Reservation).filter_by(id=reservation.id).delete()
     ical.updated_at = datetime.datetime.utcnow()
     s.commit()
     print(ical.updated_at)
