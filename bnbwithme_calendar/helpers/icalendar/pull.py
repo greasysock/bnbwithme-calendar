@@ -81,6 +81,8 @@ def abb_recover_guest(guest_string : str):
     return guest_string.split('(')[0][:-1]
 
 def abb_recover_email(email_string : str):
+    if not email_string:
+        return None
     whitespace_free_email = email_string.strip()
     if whitespace_free_email in abb_not_available:
         return None
