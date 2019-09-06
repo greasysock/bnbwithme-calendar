@@ -27,7 +27,7 @@ for ical in icals:
             logging.info(log_change("ADDING", ical, reservation))
     # Reverse check reservations
     search = s.query(models.Reservation).filter_by(ical=ical).filter(models.Reservation.end >= datetime.datetime.now().date()).all()
-    if reservations.__len__() == 0:
+    if len(reservations) == 0:
         search = []
         logging.warning(f'ICAL Feed Empty: {ical.id} {ical.link} {ical.location.name}')
     for reservation in search:
