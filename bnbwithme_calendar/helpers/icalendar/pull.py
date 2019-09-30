@@ -122,7 +122,12 @@ def get_all_airbnb_reservations(ical : models.Ical):
 vrbo_not_available = {"Blocked"}
 
 def vrbo_recover_guest(guest:str):
-    return guest.split("-")[1][1:]
+    guest_deconstruction = guest.split("-")
+    if len(guest_deconstruction) == 1:
+        return guest_deconstruction[0]
+    elif len(guest_deconstruction) == 2:
+        return guest_deconstruction[1][1:]
+    raise ValueError("Guest not found in array or array is changed!")
 
 def get_all_vrbo_reservations(ical : models.Ical):
     split_list = get_raw_split_ical(ical)
