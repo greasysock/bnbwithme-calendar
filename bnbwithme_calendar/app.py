@@ -8,7 +8,7 @@ logging.basicConfig(filename='bnbwithme-calendar.log',level=logging.INFO)
 s = Session()
 
 def log_change(prepend:str, ical, reservation):
-        return f'{prepend}: (property - {ical.location.name}) (start - {reservation.start}) (end {reservation.end}) (guest - {reservation.guest}) (service {ical.service})'
+    return f'{prepend}: (property - {ical.location.name}) (start - {reservation.start}) (end {reservation.end}) (guest - {reservation.guest}) (service {ical.service})'
 
 
 # Only sync 3 at a time.
