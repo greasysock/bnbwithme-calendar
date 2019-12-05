@@ -6,7 +6,7 @@ headers = {'user-agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) Apple
 def get_raw_ical(link):
     r = requests.get(link, headers=headers)
     return r.content.decode('utf-8')
-    #return open('vrbotest.ics', 'r').read()
+    #return open('abbtest.ics', 'r').read()
 
 # Returns array split by BEGIN/END
 def get_raw_split_ical(ical : models.Ical):
@@ -62,6 +62,8 @@ def abb_recover_itinerary(guest_string : str):
     # New abb parse method
     start_index = None
     end_index = None
+    if guest_string=="Reserved":
+        return guest_string
     for n, letter in enumerate(guest_string):
         if letter == "(":
             start_index = n+1
@@ -78,6 +80,8 @@ def abb_recover_itinerary(guest_string : str):
 abb_not_available = {'Not available', "(no email alias available)"}
 
 def abb_recover_guest(guest_string : str):
+    if guest_string == "Reserved":
+        return guest_string
     return guest_string.split('(')[0][:-1]
 
 def abb_recover_email(email_string : str):
