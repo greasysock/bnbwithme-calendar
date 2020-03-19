@@ -4,7 +4,7 @@ from helpers.icalendar import pull as ical_pull
 import datetime, time, logging
 Session = models.session()
 
-logging.basicConfig(filename='bnbwithme-calendar.log',level=logging.INFO)
+logging.basicConfig(filename='bnbwithme-calendar.log', level=logging.INFO)
 s = Session()
 
 def log_change(prepend:str, ical, reservation):

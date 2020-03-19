@@ -9,7 +9,7 @@ def get_raw_ical(link):
     #return open('abbtest.ics', 'r').read()
 
 # Returns array split by BEGIN/END
-def get_raw_split_ical(ical : models.Ical):
+def get_raw_split_ical(ical:models.Ical):
     tmpraw = get_raw_ical(ical.link).split('\\n')
     raw = []
 
@@ -133,7 +133,7 @@ def vrbo_recover_guest(guest:str):
         return guest_deconstruction[1][1:]
     raise ValueError("Guest not found in array or array is changed!")
 
-def get_all_vrbo_reservations(ical : models.Ical):
+def get_all_vrbo_reservations(ical:models.Ical):
     split_list = get_raw_split_ical(ical)
     find = ("DTSTART;VALUE=DATE", "DTEND;VALUE=DATE", "SUMMARY")
     out_reservations = []
@@ -150,7 +150,7 @@ def get_all_vrbo_reservations(ical : models.Ical):
             out_reservations.append(reservation)
     return out_reservations
 
-def get_all_reservations(ical : models.Ical):
+def get_all_reservations(ical:models.Ical):
     if ical.site() is models.Service.airbnb:
         return get_all_airbnb_reservations(ical)
     elif ical.site() is models.Service.vrbo:
