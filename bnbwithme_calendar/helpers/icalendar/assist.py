@@ -8,13 +8,14 @@ class Connection:
   _ical_condition = "BEGIN:VCALENDAR"
   _begin_event = "BEGIN:VEVENT"
   _end_event = "END:VEVENT"
+  _start_date = 'DTSTART;VALUE=DATE'
+  _end_date = 'DTEND;VALUE=DATE'
   _headers = {'user-agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'}
 
-  def __init__(self, ical: models.Ical, test=False):
+  def __init__(self, ical: models.Ical):
     self.__alive:bool = False
     self.__ical:models.Ical = ical
     self.__reservations:List[models.Reservation] = []
-    self.__test = test
     self._content = None
     self._get_reservations()
 
@@ -47,6 +48,7 @@ class Connection:
 
     return get_all_split_reservations(raw_reservations, 0)
 
+  @classmethod
   def _recover_reservation_key_values(self, unp_reservation:List[str]):
     key_values = dict()
     # Create map for potential recoveries
@@ -57,15 +59,18 @@ class Connection:
 
     return key_values
   
+  @classmethod
   def _parse_date(self, date_string):
     return datetime.datetime.strptime(date_string, "%Y%m%d").date()
 
   # Implemented in children classes
+  @classmethod
   def _process_guest(self, raw_reservation, key_value_reservation, tar_reservation):
     return False
 
+  @classmethod
   def _process_start(self, raw_reservation, key_value_reservation, tar_reservation):
-    start_date_string = key_value_reservation.get('DTSTART;VALUE=DATE')
+    start_date_string = key_value_reservation.get(self._start_date)
     if start_date_string:
       start_date = self._parse_date(start_date_string)
       tar_reservation.start = start_date
@@ -73,15 +78,16 @@ class Connection:
 
     return False
 
+  @classmethod
   def _process_end(self, raw_reservation, key_value_reservation, tar_reservation):
-    end_date_string = key_value_reservation.get('DTEND;VALUE=DATE')
+    end_date_string = key_value_reservation.get(self._end_date)
     if end_date_string:
       end_date = self._parse_date(end_date_string) + datetime.timedelta(days=1)
       if end_date >= datetime.datetime.now().date():
         tar_reservation.end = end_date
         return True
     return False
-  
+
   def _process_duration(self, tar_reservation:models.Reservation):
     tar_reservation.duration = int((tar_reservation.end - tar_reservation.start).days)
 
@@ -112,12 +118,10 @@ class Connection:
     return self.__reservations
 
   def __get_raw_ical(self):
-    if not self.__test:
-      r = requests.get(self.ical.link, headers=self._headers)
-      if r.ok:
-        return r.content.decode('utf-8')
-      return False
-    return open('abbtest.ics', 'r').read()
+    r = requests.get(self.ical.link, headers=self._headers)
+    if r.ok:
+      return r.content.decode('utf-8')
+    return False
 
   @property
   def alive(self):

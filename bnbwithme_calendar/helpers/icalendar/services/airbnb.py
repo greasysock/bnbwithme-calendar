@@ -3,11 +3,12 @@ from db import models
 import re
 
 class AirbnbConnection(Connection):
-  _not_available = {'Not available', '(no email alias available)'}
+  _not_available = {'Not available'}
 
-  def __init__(self, ical:models.Ical, test=False):
-    super().__init__(ical, test)
+  def __init__(self, ical:models.Ical):
+    super().__init__(ical)
   
+  @classmethod
   def _process_guest(self, raw_reservation, key_value_reservation, tar_reservation:models.Reservation):
     guest_string = key_value_reservation.get('SUMMARY')
     print(key_value_reservation)
