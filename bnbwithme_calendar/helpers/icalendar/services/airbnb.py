@@ -11,7 +11,6 @@ class AirbnbConnection(Connection):
   @classmethod
   def _process_guest(self, raw_reservation, key_value_reservation, tar_reservation:models.Reservation):
     guest_string = key_value_reservation.get('SUMMARY')
-    print(key_value_reservation)
     if guest_string == 'Reserved':
       tar_reservation.guest = guest_string
       return True

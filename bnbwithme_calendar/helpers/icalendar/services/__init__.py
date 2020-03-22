@@ -6,5 +6,5 @@ ical_reduction = {
   1: vrbo.VrboConnection
 }
 
-def reduce_connection(ical:models.Ical, test=False):
-  return ical_reduction[ical.service](ical, test)
+def reduce_connection(ical:models.Ical):
+  return ical_reduction[ical.service](ical)
